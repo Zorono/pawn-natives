@@ -5,12 +5,9 @@
 namespace pawn_natives
 {
 #ifdef PAWN_NATIVES_HAS_FUNC
-std::list<NativeFuncBase*>*
-	NativeFuncBase::all_
-	= 0;
 #endif
 
-int AmxLoad(AMX* amx)
+inline int AmxLoad(AMX* amx)
 {
 	int
 		ret
