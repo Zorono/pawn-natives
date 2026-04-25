@@ -115,8 +115,8 @@ private:
 	cell*
 		params_;
 
-	static std::list<NativeFuncBase*>*
-		all_;
+	static inline std::list<NativeFuncBase*>*
+		all_ = nullptr;
 };
 
 template <typename RET, typename... TS>
