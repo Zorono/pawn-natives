@@ -4,8 +4,6 @@
 
 namespace pawn_natives
 {
-#ifdef PAWN_NATIVES_HAS_FUNC
-#endif
 
 inline int AmxLoad(AMX* amx)
 {
