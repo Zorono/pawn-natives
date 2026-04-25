@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.19)
 
+# Get the absolute path and normalize it to avoid junction/space issues
+# Junctions with spaces breaks the build process....
+get_filename_component(BIN_DIR "${CMAKE_BINARY_DIR}" REALPATH)
+
 if (NOT MAIN_RUN)
 		project(dependencies)
 
 		include(ExternalProject)
 		include(FetchContent)
-
-		# Get the absolute path and normalize it to avoid junction/space issues
-		# Junctions with spaces breaks the build process....
-		get_filename_component(BIN_DIR "${CMAKE_BINARY_DIR}" REALPATH)
 
 		ExternalProject_Add(samp-plugin-sdk
 				PREFIX "samp-plugin-sdk"
@@ -96,34 +96,40 @@ else ()
 		include(AMXConfig)
 		include(AddSAMPPlugin)
 
-		include_directories(
-				${BIN_DIR}/external/samp-plugin-sdk-src
-				${BIN_DIR}/external/samp-plugin-sdk-src/amx
-				${BIN_DIR}/external/subhook-src
-				${BIN_DIR}/external/sampgdk-src/src/sampgdk/include/
-				${BIN_DIR}/external/sampgdk-src/src/sampgdk-build/include/
+		add_samp_plugin(pawn-natives
+				${BIN_DIR}/external/subhook-src/subhook.c
+				${BIN_DIR}/external/samp-plugin-sdk-src/amxplugin.cpp
+				${BIN_DIR}/external/samp-plugin-sdk-src/amxplugin2.cpp
+		)
+
+		target_include_directories(pawn-natives
+				PRIVATE
+				$<BUILD_INTERFACE:${BIN_DIR}/external/samp-plugin-sdk-src>
+				$<BUILD_INTERFACE:${BIN_DIR}/external/samp-plugin-sdk-src/amx>
+				$<INSTALL_INTERFACE:amx>
+		)
+
+		target_include_directories(pawn-natives
+				PRIVATE
+				$<BUILD_INTERFACE:${BIN_DIR}/external/sampgdk-src>
+				$<BUILD_INTERFACE:${BIN_DIR}/external/sampgdk-src/include>
+				$<INSTALL_INTERFACE:sampgdk>
 		)
 
 		add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 		add_definitions(-DSUBHOOK_IMPLEMENTATION)
 		add_definitions(-DHAVE_STDINT_H=1)
 
-		add_samp_plugin(pawn-natives
-				test.cpp
-				${BIN_DIR}/external/subhook-src/subhook.c
-				${BIN_DIR}/external/samp-plugin-sdk-src/amxplugin.cpp
-				${BIN_DIR}/external/samp-plugin-sdk-src/amxplugin2.cpp
-		)
 
 		if (WIN32)
 				target_link_libraries(pawn-natives
-						${BIN_DIR}/external/sampgdk-src/src/sampgdk-build/Release/sampgdk4.lib
+						${BIN_DIR}/external/sampgdk-build/Release/sampgdk3.lib
 				)
 
 				set_target_properties(pawn-natives PROPERTIES LINKER_LANGUAGE CXX)
 		else ()
 				target_link_libraries(pawn-natives
-						${BIN_DIR}/external/sampgdk-src/src/sampgdk-build/libsampgdk.so
+						${BIN_DIR}/external/sampgdk-build/libsampgdk.so
 				)
 
 				set(CMAKE_CXX_FLAGS "-std=gnu++0x -m32")
